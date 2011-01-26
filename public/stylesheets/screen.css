@@ -1,0 +1,113 @@
+/*---------------------------------------------
+  reset styles                                 
+-----------------------------------------------*/
+
+body, div, ol, ul, li, h1, h2, h3, h4, h5, h6, form, fieldset, p, hr {
+	padding: 0;
+	margin: 0;
+	font-weight: normal;
+	text-align: left;
+	border: none;
+}
+table {
+    border-collapse: collapse;
+}
+img {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+ol, ul {
+    list-style: none;
+}
+
+
+/*---------------------------------------------
+  core styles                                 
+-----------------------------------------------*/
+
+body {
+    width: 1600px;
+    height: 1200px;
+	font-size: 12px/14px;
+	font-family: Helvetica, Arial, Sans-Serif;
+	background: #fff;
+	color: #333;
+}
+input {
+    padding: 2px;
+    font-size: 16px;
+    border: 1px solid #999;
+}
+
+
+
+/*---------------------------------------------
+  example styles                                 
+-----------------------------------------------*/
+
+.main_container {
+    float: left;
+    margin: 20px 100px;
+    padding: 10px 0;
+    width: 500px;
+    height: 500px;
+    border: 1px solid #999;
+    border-radius: 12px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
+}
+.scrollable {
+    overflow: auto;
+}
+.target {
+    cursor: pointer;
+    padding: 6px 12px;
+    width: 80px;
+    text-align: center;
+    background: #00a0c6;
+    color: #fff;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+}
+
+#scrolling_container {
+    width: 600px;
+    height: 1200px;
+}
+#top_container {
+    margin: 50px 0 0 100px;
+}
+#bottom_container {
+    margin: 50px 0 0 100px;
+}
+#left_container {
+    margin: 250px 0 0 100px;
+}
+#right_container {
+    margin: 200px 0 0 100px;
+}
+
+#selector_for_iframe_verification {
+    position: absolute;
+    top: 250px;
+    left: 650px;
+}
+
+#console {
+    position: absolute;
+    top: 600px;
+    left: 100px;
+    padding-top: 50px;
+    width: 1200px;
+}
+#console h2 {
+    border-bottom: 1px solid #333;
+}
+#console .log_container div {
+    margin: 6px 0;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #ccc;
+}

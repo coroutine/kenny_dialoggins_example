@@ -1,0 +1,67 @@
+<!-- ----------------- -->
+<!-- console container -->
+<!-- ----------------- -->
+
+<div id="console">
+  <h2>Console</h2>
+  <div class="log_container"></div>
+</div>
+
+
+
+<!-- ---------------------- -->
+<!-- unscrollable container -->
+<!-- ---------------------- -->
+
+<div class="main_container">
+  
+  <!-- top -->
+  <div id="top_container">
+    <div data-dialog-id="dialog_with_block_notation" class="target">Block</div>
+    <%= render_dialog :dialog_with_block_notation do %>
+      <div>This uses block notation instead of the :inline option.</div>
+    <% end %>
+  </div>
+  
+  <!-- left -->
+  <div id="left_container">
+    <div data-dialog-id="dialog_with_inline_notation" class="target">Inline</div>
+    <%= render_dialog :dialog_with_inline_notation, :class => "help_dialog", :inline => "<div>This example uses inline markup.</div>" %>
+  </div>
+  
+</div>
+
+
+
+<!-- ------------------- -->
+<!-- iframe verification -->
+<!-- ------------------- -->
+
+<select id="selector_for_iframe_verification">
+  <option value="1">Option 1</option>
+  <option value="2">Option 2</option>
+</select>
+
+
+
+<!-- -------------------- -->
+<!-- scrollable container -->
+<!-- -------------------- -->
+
+<div class="main_container scrollable">
+  <div id="scrolling_container">
+  
+    <!-- bottom -->
+    <div id="bottom_container">
+      <div data-dialog-id="dialog_with_text_notation" class="target">Text</div>
+      <%= render_dialog :dialog_with_text_notation, :class => :error_dialog, :text => "This example uses simple text." %>
+    </div>
+    
+    <!-- right -->
+    <div id="right_container">
+      <div data-dialog-id="dialog_with_partial_notation" class="target">Partial</div>
+      <%= render_dialog :dialog_with_partial_notation, :partial => "partial_example", :locals => { :name => "John" } %>
+    </div>
+    
+  </div>
+</div>

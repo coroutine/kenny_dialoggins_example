@@ -1,0 +1,187 @@
+= Kenny Dialoggins
+
+Hey, there.
+
+I'm Kenny Dialoggins.  A lot of people confuse me with the singer who rose to fame in the 1980s, but 
+I'm a different guy altogether.  
+
+Don't get me wrong, that Kenny and I are into a lot of the same things, like manly beards and Miami Vice-
+inspired attire.  But while that Kenny spent his career focused on synth beats and lyrics that cut to 
+the bone, I only care about one thing.
+
+<b>Freakin' Dialogs</b>.  
+
+If you're a Rails developer who wants to use dialogs but doesn't want to mess with Javascript, you 
+might want to prep your best friend for some bad news.  We're about to become tight.
+
+Let me lay it out for you.  If you want my dialog in one of your views, here's what you do:
+
+    # Create the dialog
+    <%= render_dialog :danger_zone_dialog, :partial => "danger_zone", :locals => { :pilot => current_user } %>
+    
+    # Invoke the dialog
+    <%= link_to_function "Take Me to the Danger Zone", show_dialog(:danger_zone_dialog) %>
+
+That's pretty much it.  Did you notice how <tt>render_dialog</tt> takes the same options as 
+<tt>render</tt>?  The content for your dialog can just be a regular old partial.
+
+You like that.  I can tell.  Don't fight it.
+
+What's that, you want more details?  You got it, buddy.
+
+<tt>render_dialog</tt> always needs a unique id for its first argument.  After that, it will
+take the same options as <tt>ActionController::Base#render</tt>.  It'll also take a few more, namely:
+
+* <tt>:id</tt> - an element id for the generated dialog.  If not provided, the value provided as the first argument to render_dialog will be used.
+* <tt>:class</tt> - a css class name that will be appended to the outermost div to facilitate multiple styles
+* <tt>:before_show</tt> - a Javascript function that will be invoked before the dialog is shown
+* <tt>:after_show</tt> - a Javascript function that will be invoked after the dialog has become visible
+* <tt>:before_hide</tt> - a Javascript function that will be invoked before the dialog is hidden
+* <tt>:after_hide</tt> - a Javascript function that will be invoked after the dialog has been hidden
+* <tt>&block</tt> - HTML markup that will be automatically converted to render's inline option
+
+Here's an example using the <tt>before_show</tt> option:
+
+    # Create the dialog with a callback
+    <%= render_dialog :footloose_dialog, :partial => "footloose", :before_show => "function() { alert('Everybody get footloose!'); }" %>
+
+To invoke the dialog, use unobtrusive javascript to trap a click event and show the dialog.
+
+    // invoke the dialog
+    $("footloose_dialog_link").observe("click", function(evt) {
+      KennyDialoggins.Dialog.show("footloose_dialog");
+    });
+
+Or, if you're using javascript helper functions, you can use the show/hide helpers to accomplish the same thing.
+
+    # Invoke the dialog
+    <%= link_to_function "Dance party!", show_dialog(:footloose_dialog) %>
+
+If you need more help than that, maybe you should just look at the source code.  There are a ton of comments 
+in there.
+
+    
+Your pal,
+
+Kenny Dialoggins
+
+
+
+
+== Multiple Dialog Styles
+
+If you need to style more than one kind of dialog, just use the <tt>:class</tt> option to append a css class name 
+on the outermost div.  That'll give you a logical anchor around which you can restyle all the interior classes.
+
+Please note that the blocking iframe is automatically given an additional class name equal to the outermost div's class 
+name plus the string "_frame".  
+
+By default, the top-level class assignments are "kenny_dialoggins_dialog" and "kenny_dialoggins_dialog_frame". 
+
+If you set the <tt>:class</tt> option to <tt>:error_dialog</tt>, the top-level class assignments will be 
+"kenny_dialoggins_dialog error_dialog" and "kenny_dialoggins_dialog_frame error_dialog_frame".
+
+
+
+== IE6 Support
+
+I'm not what you'd call a huge fan of IE6, so I don't provide a blocking 
+iframe for my dialogs by default.  But I can.  You just need to ask nicely.
+
+At the top of the generated javascript file, just change the obviously-named property 
+hanging	right off of the Kenny D namespace.  Like this.
+
+	KennyDialoggins.SUPPORT_IE6_BULLSHIT = true;
+
+That's it. I do the rest.
+
+
+
+== Helpful Links
+
+* <b>Repository:</b> http://github.com/coroutine/kenny_dialoggins
+* <b>Gem:</b> http://rubygems.org/gems/kenny_dialoggins
+* <b>Authors:</b> http://coroutine.com
+
+
+
+== Prerequisites
+
+To take you to the danger zone, I need my kick ass backup singers Prototype and Scriptaculous.  
+
+But since I was designed as a Rails extension, chances are you already have my boys 
+in the mix.
+
+* <b>Prototype:</b> http://prototypejs.org
+* <b>Scriptaculous:</b> http://script.aculo.us
+
+
+
+== Installation & Generators (Rails 3)
+
+Install me from RubyGems.org by adding a gem dependency to your Gemfile.  Bundler does 
+the rest.
+
+	gem "kenny_dialoggins"
+	
+	$ bundle install
+
+Then generate the required javascript file and the starter stylesheet.
+
+	$ rails g kenny_dialoggins
+	
+
+
+== Installation & Generators (Rails 2)
+
+Install me from RubyGems.org and add a gem dependency in the appropriate file.
+
+	$ gem install kenny_dialoggins
+
+Or install me as a plugin.
+
+	$ script/plugin install git://github.com/coroutine/kenny_dialoggins.git
+
+Either way, then generate the required javascript file and the starter stylesheet.
+
+	$ script/generate kenny_dialoggins
+	
+
+
+== Gemroll
+
+If you think I'm awesome, you should check out my soulmate 
+{Michael Hintbuble}[http://github.com/coroutine/michael_hintbuble].
+
+Other gems by Coroutine include:
+
+* {acts_as_current}[http://github.com/coroutine/acts_as_current]
+* {acts_as_label}[http://github.com/coroutine/acts_as_label]
+* {acts_as_list_with_sti_support}[http://github.com/coroutine/acts_as_list_with_sti_support]
+* {delayed_form_observer}[http://github.com/coroutine/delayed_form_observer]
+* {tiny_navigation}[http://github.com/coroutine/tiny_navigation]
+
+
+
+== License
+
+Copyright (c) 2010 {Coroutine LLC}[http://coroutine.com].
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
