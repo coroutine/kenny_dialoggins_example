@@ -35,10 +35,10 @@ KennyDialoggins.Dialog = function(content, options) {
     
     this._id            = options["id"];
     this._class         = options["class"]      || "";
-    this._beforeShow    = options["beforeShow"] || Prototype.emptyFunction;
-    this._afterShow     = options["afterShow"]  || Prototype.emptyFunction;
-    this._beforeHide    = options["beforeHide"] || Prototype.emptyFunction;
-    this._afterHide     = options["afterHide"]  || Prototype.emptyFunction;
+    this._beforeShow    = options["beforeShow"] || function() {};
+    this._afterShow     = options["afterShow"]  || function() {};
+    this._beforeHide    = options["beforeHide"] || function() {};
+    this._afterHide     = options["afterHide"]  || function() {};
     
     this._makeDialog();
     this.setContent(content);
@@ -65,10 +65,10 @@ KennyDialoggins.Dialog.instances = {};
  * This hash is a convenience that allows us to write slightly denser code when 
  * calculating the dialog's position.
  */
-KennyDialoggins.Dialog._POSITION_FN_MAP = $H({
+KennyDialoggins.Dialog._POSITION_FN_MAP = { // *cw*
     left:   "getWidth",
     top:    "getHeight"
-});
+};
 
 
 /**
@@ -143,175 +143,161 @@ KennyDialoggins.Dialog.show = function(id) {
 
 
 
-// ----------------------------------------------------------------------------
-// Instance methods
-// ----------------------------------------------------------------------------
 
-Object.extend(KennyDialoggins.Dialog.prototype, {
-
-
-    /**
-     * This function creates the function that handles click events when the dialog is 
-     * shown.  The handler ignores clicks targeted from within the dialog; any click 
-     * targeted outside the dialog causes the dialog to hide itself and cancel the 
-     * observer.
-     */
-    _generateHideListener: function() {
-        return function(evt) {
-            var origin = evt.findElement(".kenny_dialoggins_dialog");
-            if (this._element !== origin) {
-                this.hide();
-            }
-        }.bind(this);
-    },
-
-
-    /**
-     * This function indicates whether or not the dialog is currently 
-     * being shown.
-     *
-     * @return {Boolean}    Whether or not the dialog is being shown.
-     */
-    _isShowing: function() {
-        return this._isShowing;
-    },
-    
-    /**
-     * This function constructs the dialog element and hides it by default.
-     *
-     * The class name is set outside the element constructor to accommodate
-     * a discrepancy in how prototype handles this particular attribute. The
-     * attribute is set as className in IE8--rather than class--which means the 
-     * styles are not applied and the element's positioning gets royally
-     * screwed up.
-     */
-    _makeDialog: function() {
-        if (!this._element) {
-            this._element = new Element("DIV", { id: this._id });
-            this._element.addClassName("kenny_dialoggins_dialog");
-            if (this._class) {
-                this._element.addClassName(this._class);
-            }
-            this._element.hide();
-            document.body.appendChild(this._element);
+/**
+ * This function creates the function that handles click events when the dialog is 
+ * shown.  The handler ignores clicks targeted from within the dialog; any click 
+ * targeted outside the dialog causes the dialog to hide itself and cancel the 
+ * observer.
+ */
+KennyDialoggins.Dialog.prototype._generateHideListener = function() {
+    return function(evt) {
+		var origin = $(evt.target).closest(".kenny_dialoggins_dialog");		// *cw*
+        if (this._element.attr('id') !== origin.attr('id')) {				// *cw*
+            this.hide();
         }
-    },
-    
-    
-    /**
-     * This function constructs the iframe element and hides it by default.
-     *
-     * The class name is set outside the element constructor to accommodate
-     * a discrepancy in how prototype handles this particular attribute. The
-     * attribute is set as className in IE8--rather than class--which means the 
-     * styles are not applied and the element's positioning gets royally
-     * screwed up.
-     */
-    _makeFrame: function() {
-        if (!this._frame) {
-            this._frame = new Element("IFRAME");
-            this._frame.addClassName("kenny_dialoggins_dialog_frame");
-            if (this._class) {
-                this._element.addClassName(this._class);
-            }
-            this._frame.setAttribute("src", "about:blank");
-            this._frame.hide();
-            document.body.appendChild(this._frame);
+    }.bind(this);
+};
+
+
+/**
+ * This function indicates whether or not the dialog is currently 
+ * being shown.
+ *
+ * @return {Boolean}    Whether or not the dialog is being shown.
+ */
+KennyDialoggins.Dialog.prototype._isShowing = function() {
+    return this._isShowing;
+},
+
+/**
+ * This function constructs the dialog element and hides it by default.
+ *
+ * The class name is set outside the element constructor to accommodate
+ * a discrepancy in how prototype handles this particular attribute. The
+ * attribute is set as className in IE8--rather than class--which means the 
+ * styles are not applied and the element's positioning gets royally
+ * screwed up.
+ */
+KennyDialoggins.Dialog.prototype._makeDialog = function() {
+    if (!this._element) {
+        this._element = $('<div id="' + this._id + '"></div'); // *cw*
+        this._element.addClass("kenny_dialoggins_dialog");     // *cw*
+        if (this._class) {
+            this._element.addClass(this._class);			   // *cw*
         }
-    },
-
-
-    /**
-     * This function allows the dialog object to be destroyed without
-     * creating memory leaks.
-     */
-    finalize: function() {
-        this.hide();
-
-        this._element.remove();
-        this._element = null;
-
-        if (this._frame) {
-            this._frame.remove();
-            this._frame = null;
-        }
-
-        this._hideListener = null;
-    },
-
-
-    /**
-     * This function hides the dialog. It uses a scriptaculous effect to fade out 
-     * and disconnects the click observer to prevent memory leaks.
-     */
-    hide: function() {
-        new Effect.Fade(this._element, {
-            duration: 0.2,
-            beforeStart:    this._beforeHide,
-            afterFinish:    function() {
-                this._isShowing = false;
-                this._afterHide();
-                document.stopObserving("click", this._hideListener);
-            }.bind(this)
-        });
-
-        if (this._frame) {
-            new Effect.Fade(this._frame, {
-                duration: 0.2
-            });
-        }
-    },
-    
-    
-    /**
-     * This function sets the content of the dialog element.
-     *
-     * @param {Object} content  The html content for the dialog.
-     */
-    setContent: function(content) {
-        this._element.update(content);
-    },
-    
-    
-    /**
-     * This function sets the position of the dialog element.
-     */
-    setPosition: function() {
-        var layout               = new Element.Layout(this._element);
-        this._element.style.top  = Math.ceil(((document.viewport.getHeight()/2) + (document.viewport.getScrollOffsets().top)  - (layout.get("padding-box-height")/2)) * 2/3) + "px";
-        this._element.style.left = Math.ceil((document.viewport.getWidth()/2)  + (document.viewport.getScrollOffsets().left) - (layout.get("padding-box-width")/2))  + "px";
-    },
-    
-    
-    /**
-     * This function displays the dialog. It uses a scriptaculous effect to fade in,
-     * centers the dialog in the viewport (and adjusts the blocking iframe, if in use), 
-     * and connects a click observer to hide the dialog whenever mouse focus leaves 
-     * the dialog.
-     */
-    show: function() {
-        this.setPosition();
-        
-        if (this._frame) {
-            var layout                  = new Element.Layout(this._element);
-            this._frame.style.top       = this._element.style.top;
-            this._frame.style.left      = this._element.style.left;
-            this._frame.style.width     = layout.get("padding-box-width") + "px";
-            this._frame.style.height    = layout.get("padding-box-height") + "px";
-            
-            new Effect.Appear(this._frame, {
-                duration: 0.2
-            });
-        }
-        
-        new Effect.Appear(this._element, { 
-            duration:       0.2,
-            beforeStart:    this._beforeShow,
-            afterFinish:    function() {
-                this._isShowing = true;
-                this._afterShow();
-                document.observe("click", this._hideListener);
-            }.bind(this)
-        });
+        this._element.hide();
+        this._element.appendTo(document.body); 				   // *cw*
     }
-});
+},
+
+
+/**
+ * This function constructs the iframe element and hides it by default.
+ *
+ * The class name is set outside the element constructor to accommodate
+ * a discrepancy in how prototype handles this particular attribute. The
+ * attribute is set as className in IE8--rather than class--which means the 
+ * styles are not applied and the element's positioning gets royally
+ * screwed up.
+ */
+KennyDialoggins.Dialog.prototype._makeFrame = function() {
+    if (!this._frame) {
+        this._frame = new Element("IFRAME");
+        this._frame.addClassName("kenny_dialoggins_dialog_frame");
+        if (this._class) {
+            this._element.addClassName(this._class);
+        }
+        this._frame.setAttribute("src", "about:blank");
+        this._frame.hide();
+        document.body.appendChild(this._frame);
+    }
+},
+
+
+/**
+ * This function allows the dialog object to be destroyed without
+ * creating memory leaks.
+ */
+KennyDialoggins.Dialog.prototype.finalize = function() {
+    this.hide();
+
+    this._element.remove();
+    this._element = null;
+
+    if (this._frame) {
+        this._frame.remove();
+        this._frame = null;
+    }
+
+    this._hideListener = null;
+},
+
+
+/**
+ * This function hides the dialog. It uses a scriptaculous effect to fade out 
+ * and disconnects the click observer to prevent memory leaks.
+ */
+KennyDialoggins.Dialog.prototype.hide = function() {
+	this._beforeHide; 										   // *cw*
+	this._element.fadeOut(200)								   // *cw*
+	this._isShowing = false;	        					   // *cw*
+   	this._afterHide;  			    						   // *cw*
+	$(document).unbind('click');      					 	   // *cw* 
+
+    if (this._frame) {  									   // *cw*
+		this._frame.fadeOut(200)  ;                            // *cw*
+    }
+},
+
+
+/**
+ * This function sets the content of the dialog element.
+ *
+ * @param {Object} content  The html content for the dialog.
+ */
+KennyDialoggins.Dialog.prototype.setContent = function(content) {
+    this._element.html(content);
+},
+
+
+/**
+ * This function sets the position of the dialog element.
+ */
+KennyDialoggins.Dialog.prototype.setPosition = function() {
+    this._element.css('top', Math.ceil((($(window).height()/2) + $(window).scrollTop()   - (this._element.outerHeight()/2)) * 2/3) + "px" ); // *cw*
+
+    this._element.css('left', Math.ceil(($(window).width()/2) + $(window).scrollLeft() - (this._element.outerWidth()/2))  + "px" );			 // *cw*
+},
+
+
+/**
+ * This function displays the dialog. It uses a scriptaculous effect to fade in,
+ * centers the dialog in the viewport (and adjusts the blocking iframe, if in use), 
+ * and connects a click observer to hide the dialog whenever mouse focus leaves 
+ * the dialog.
+ */
+KennyDialoggins.Dialog.prototype.show = function() {
+
+    this.setPosition();
+    
+    if (this._frame) {
+        this._frame.style.top       = this._element.style.top;
+        this._frame.style.left      = this._element.style.left;
+        this._frame.style.width     = this._element.outerWidth() + "px";   // *cw*
+        this._frame.style.height    = this._element.outerHeight() + "px";  // *cw*
+        
+		this._frame.fadeIn(200);						      // *cw*
+    }
+    
+	this._beforeShow; 										  // *cw*
+	var main_this = this;									  // *cw*
+	this._element.fadeIn(200,function() { 				  	  // *cw*
+		this._isShowing = true;                  			  // *cw*
+	    this._afterShow;   	                                  // *cw*
+		$(document).click(main_this._hideListener);	          // *cw*
+	});					           						      // *cw*
+  
+  
+	
+}

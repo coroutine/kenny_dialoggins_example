@@ -59,7 +59,8 @@ module Coroutine
         raise "You must specify an id to register a dialog."    unless id
         raise "You must provide content to register a dialog."  unless content
         
-        javascript_tag "Event.observe(window, 'load', function() { KennyDialoggins.Dialog.instances['#{id.to_s}'] = new KennyDialoggins.Dialog('#{content}', #{javascript_options}) });"
+        
+        javascript_tag "$(window).load(function() { KennyDialoggins.Dialog.instances['#{id.to_s}'] = new KennyDialoggins.Dialog('#{content}', #{javascript_options}) });"
       end
       
       
