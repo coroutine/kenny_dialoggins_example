@@ -206,14 +206,14 @@ KennyDialoggins.Dialog.prototype._makeDialog = function() {
  */
 KennyDialoggins.Dialog.prototype._makeFrame = function() {
     if (!this._frame) {
-        this._frame = new Element("IFRAME");
-        this._frame.addClassName("kenny_dialoggins_dialog_frame");
+        this._frame = $("<iframe></iframe>");
+        this._frame.addClass("kenny_dialoggins_dialog_frame");
         if (this._class) {
-            this._element.addClassName(this._class);
+            this._element.addClass(this._class);
         }
-        this._frame.setAttribute("src", "about:blank");
+        this._frame.attr("src", "about:blank");
         this._frame.hide();
-        document.body.appendChild(this._frame);
+        this._frame.appendTo(document.body);
     }
 },
 
@@ -285,12 +285,12 @@ KennyDialoggins.Dialog.prototype.show = function() {
     this.setPosition();
     
     if (this._frame) {
-        this._frame.style.top       = this._element.style.top;
-        this._frame.style.left      = this._element.style.left;
-        this._frame.style.width     = this._element.outerWidth() + "px";   // *cw*
-        this._frame.style.height    = this._element.outerHeight() + "px";  // *cw*
+		this._frame.css('top', this._element.css('top'));               // *cw*
+		this._frame.css('left', this._element.css('left'));             // *cw*
+		this._frame.css('width', this._element.outerWidth() + "px");    // *cw*
+		this._frame.css('height', this._element.outerHeight() + "px");  // *cw*
         
-		this._frame.fadeIn(200);						      // *cw*
+		this._frame.fadeIn(200);						                // *cw*
     }
     
 	this._beforeShow; 										  // *cw*

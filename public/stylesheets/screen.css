@@ -93,6 +93,10 @@ input {
     position: absolute;
     top: 250px;
     left: 650px;
+    *position: relative;
+	*left: -30px; /*quick ie hack*/
+	*top: 200px;
+	
 }
 
 #console {
