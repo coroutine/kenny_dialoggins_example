@@ -291,14 +291,14 @@ KennyDialoggins.JQueryAdapter = function() {};
 
 
 KennyDialoggins.JQueryAdapter.prototype.hide = function(dialog) {
-    dialog._beforeHide; 										   // *cw*
-	$(dialog._element).fadeOut(200)								   // *cw*
-	dialog._isShowing = false;	        					   // *cw*
-   	dialog._afterHide;  			    						   // *cw*
-	$(document).unbind('click');      					 	   // *cw* 
-
-    if (dialog._frame) {  									   // *cw*
-		$(dialog._frame).fadeOut(200)  ;                            // *cw*
+    dialog._beforeHide; 							
+	$(dialog._element).fadeOut(200);				
+	dialog._isShowing = false;	        			
+   	dialog._afterHide;  			    			
+	$(document).unbind('click');      				
+                                                    
+    if (dialog._frame) {  							
+		$(dialog._frame).fadeOut(200)  ;            
     } 
 };
 
