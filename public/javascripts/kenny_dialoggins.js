@@ -20,6 +20,14 @@ var KennyDialoggins = {};
 KennyDialoggins.SUPPORT_IE6_BULLSHIT = false;   
 
 
+/**
+ * This property governs which Javascript framework
+ * to use with this plugin.
+ * 
+ * Defaults to JQuery, but also supports Prototype
+ */
+KennyDialoggins.JS_FRAMEWORK = 'jQuery';
+
 
 /**
  * This function puts you on the highway to the danger
@@ -209,7 +217,7 @@ KennyDialoggins.Dialog.prototype._makeFrame = function() {
     if (!this._frame) {
         this._frame                 = document.createElement("IFRAME");
         this._frame.id              = this._id;
-        this._frame.className       = (this._class) ? "kenny_dialoggins_dialog_frame " + this._class : "kenny_dialoggins_dialog_frame";
+        this._frame.className       = (this._class) ? this._class + " kenny_dialoggins_dialog_frame" : "kenny_dialoggins_dialog_frame";
         this._frame.src             = "about:blank";
         this._frame.style.display   = "none";
         document.body.appendChild(this._frame);
@@ -310,19 +318,19 @@ KennyDialoggins.JQueryAdapter.prototype.show = function(dialog) {
     var element = $(dialog._element);
     
     if (dialog._frame) {
-		frame.css('top',    element.css('top'));               // *cw*
-		frame.css('left',   element.css('left'));             // *cw*
-		frame.css('width',  element.outerWidth() + "px");    // *cw*
-		frame.css('height', element.outerHeight() + "px");  // *cw*
-        
-		frame.fadeIn(200);						                // *cw*
-    }
-    
-	dialog._beforeShow; 										  // *cw*
-	element.fadeIn(200,function() { 				  	  // *cw*
-		dialog._isShowing = true;                  			  // *cw*
-	    dialog._afterShow;   	                                  // *cw*
-		$(document).click(dialog._hideListener);	          // *cw*
+		frame.css('top',    element.css('top'));            
+		frame.css('left',   element.css('left'));           
+		frame.css('width',  element.outerWidth() + "px");   
+		frame.css('height', element.outerHeight() + "px");  
+                                                            
+		frame.fadeIn(200);						            
+    }                                                       
+                                                            
+	dialog._beforeShow; 								 
+	element.fadeIn(200,function() { 				  	 
+		dialog._isShowing = true;                  			
+	    dialog._afterShow;   	                            
+		$(document).click(dialog._hideListener);	        
 	});
 };
 
@@ -331,10 +339,68 @@ KennyDialoggins.JQueryAdapter.prototype.show = function(dialog) {
 // Prototype Adapter 
 // ----------------------------------------------------------------------------
 
+KennyDialoggins.PrototypeAdapter = function() {};
 
+
+KennyDialoggins.PrototypeAdapter.prototype.hide = function(dialog) {
+	new Effect.Fade(dialog._element, {
+        duration: 0.2,
+        beforeStart:    dialog._beforeHide,
+        afterFinish:    function() {
+            dialog._isShowing = false;
+            dialog._afterHide();
+            document.stopObserving("click", dialog._hideListener);
+        }.bind(dialog)
+    });
+
+    if (dialog._frame) {
+        new Effect.Fade(dialog._frame, {
+            duration: 0.2
+        });
+    }
+};
+
+
+KennyDialoggins.PrototypeAdapter.prototype.setPosition = function(dialog) {
+    var layout               = new Element.Layout(dialog._element);
+    dialog._element.style.top  = Math.ceil(((document.viewport.getHeight()/2) + (document.viewport.getScrollOffsets().top)  - (layout.get("padding-box-height")/2)) * 2/3) + "px";
+    dialog._element.style.left = Math.ceil((document.viewport.getWidth()/2)  + (document.viewport.getScrollOffsets().left) - (layout.get("padding-box-width")/2))  + "px";
+    
+};
+
+
+KennyDialoggins.PrototypeAdapter.prototype.show = function(dialog) {
+	dialog.setPosition();
+    
+    if (dialog._frame) {
+        var layout                  = new Element.Layout(dialog._element);
+        dialog._frame.style.top       = dialog._element.style.top;
+        dialog._frame.style.left      = dialog._element.style.left;
+        dialog._frame.style.width     = layout.get("padding-box-width") + "px";
+        dialog._frame.style.height    = layout.get("padding-box-height") + "px";
+        
+        new Effect.Appear(dialog._frame, {
+            duration: 0.2
+        });
+    }
+    
+    new Effect.Appear(dialog._element, { 
+        duration:       0.2,
+        beforeStart:    dialog._beforeShow,
+        afterFinish:    function() {
+            dialog._isShowing = true;
+            dialog._afterShow();
+            document.observe("click", dialog._hideListener);
+        }.bind(dialog)
+    });
+};
 
 // ----------------------------------------------------------------------------
-// Set default adapter
+// Set adapter
 // ----------------------------------------------------------------------------
 
-KennyDialoggins.Adapter = new KennyDialoggins.JQueryAdapter();
+if (KennyDialoggins.JS_FRAMEWORK.toLowerCase() == 'prototype') {
+	KennyDialoggins.Adapter = new KennyDialoggins.PrototypeAdapter();
+} else {
+	KennyDialoggins.Adapter = new KennyDialoggins.JQueryAdapter();
+}
