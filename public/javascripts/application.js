@@ -14,7 +14,4 @@ $(document).ready(function() { // *cw*
 });
 
 
-KennyDialoggins.SUPPORT_IE6_BULLSHIT = true;
-
-
-"if (window.addEventListener) { window.addEventListener('load', closure, false); } else { window.attachEvent('onload', closure); }"   
+KennyDialoggins.SUPPORT_IE6_BULLSHIT = false;
