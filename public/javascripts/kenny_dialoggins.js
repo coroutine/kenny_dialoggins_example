@@ -151,14 +151,16 @@ KennyDialoggins.Dialog.show = function(id) {
  * observer.
  */
 KennyDialoggins.Dialog.prototype._generateHideListener = function() {
-	var self = this;
+	var self   = this;
+	
     return function(evt) {
-		
-		var origin = $(evt.target).closest(".kenny_dialoggins_dialog");		// *cw*
-        if (self._element.attr('id') !== origin.attr('id')) {				// *cw*
+		var origin = evt.target;
+		while (origin != document.body && origin.className.indexOf("kenny_dialoggins_dialog") == -1) {
+		    origin = origin.parentNode;
+		}
+        if (self._element !== origin) {				
             self.hide();
-        }
-		
+        }		
     }
 };
 
@@ -171,7 +173,8 @@ KennyDialoggins.Dialog.prototype._generateHideListener = function() {
  */
 KennyDialoggins.Dialog.prototype._isShowing = function() {
     return this._isShowing;
-},
+};
+
 
 /**
  * This function constructs the dialog element and hides it by default.
@@ -184,15 +187,13 @@ KennyDialoggins.Dialog.prototype._isShowing = function() {
  */
 KennyDialoggins.Dialog.prototype._makeDialog = function() {
     if (!this._element) {
-        this._element = $('<div id="' + this._id + '"></div'); // *cw*
-        this._element.addClass("kenny_dialoggins_dialog");     // *cw*
-        if (this._class) {
-            this._element.addClass(this._class);			   // *cw*
-        }
-        this._element.hide();
-        this._element.appendTo(document.body); 				   // *cw*
+        this._element               = document.createElement("DIV");
+        this._element.id            = this._id;
+        this._element.className     = (this._class) ? "kenny_dialoggins_dialog " + this._class : "kenny_dialoggins_dialog";
+        this._element.style.display = "none";
+        document.body.appendChild(this._element); 
     }
-},
+};
 
 
 /**
@@ -206,16 +207,14 @@ KennyDialoggins.Dialog.prototype._makeDialog = function() {
  */
 KennyDialoggins.Dialog.prototype._makeFrame = function() {
     if (!this._frame) {
-        this._frame = $("<iframe></iframe>");
-        this._frame.addClass("kenny_dialoggins_dialog_frame");
-        if (this._class) {
-            this._element.addClass(this._class);
-        }
-        this._frame.attr("src", "about:blank");
-        this._frame.hide();
-        this._frame.appendTo(document.body);
+        this._frame                 = document.createElement("IFRAME");
+        this._frame.id              = this._id;
+        this._frame.className       = (this._class) ? "kenny_dialoggins_dialog_frame " + this._class : "kenny_dialoggins_dialog_frame";
+        this._frame.src             = "about:blank";
+        this._frame.style.display   = "none";
+        document.body.appendChild(this._frame);
     }
-},
+};
 
 
 /**
@@ -225,16 +224,16 @@ KennyDialoggins.Dialog.prototype._makeFrame = function() {
 KennyDialoggins.Dialog.prototype.finalize = function() {
     this.hide();
 
-    this._element.remove();
+    document.body.removeChild(this._element);
     this._element = null;
 
     if (this._frame) {
-        this._frame.remove();
+        document.body.removeChild(this._frame);
         this._frame = null;
     }
 
     this._hideListener = null;
-},
+};
 
 
 /**
@@ -242,16 +241,8 @@ KennyDialoggins.Dialog.prototype.finalize = function() {
  * and disconnects the click observer to prevent memory leaks.
  */
 KennyDialoggins.Dialog.prototype.hide = function() {
-	this._beforeHide; 										   // *cw*
-	this._element.fadeOut(200)								   // *cw*
-	this._isShowing = false;	        					   // *cw*
-   	this._afterHide;  			    						   // *cw*
-	$(document).unbind('click');      					 	   // *cw* 
-
-    if (this._frame) {  									   // *cw*
-		this._frame.fadeOut(200)  ;                            // *cw*
-    }
-},
+    KennyDialoggins.Adapter.hide(this);
+};
 
 
 /**
@@ -260,18 +251,16 @@ KennyDialoggins.Dialog.prototype.hide = function() {
  * @param {Object} content  The html content for the dialog.
  */
 KennyDialoggins.Dialog.prototype.setContent = function(content) {
-    this._element.html(content);
-},
+    this._element.innerHTML = content;
+};
 
 
 /**
  * This function sets the position of the dialog element.
  */
 KennyDialoggins.Dialog.prototype.setPosition = function() {
-    this._element.css('top', Math.ceil((($(window).height()/2) + $(window).scrollTop()   - (this._element.outerHeight()/2)) * 2/3) + "px" ); // *cw*
-
-    this._element.css('left', Math.ceil(($(window).width()/2) + $(window).scrollLeft() - (this._element.outerWidth()/2))  + "px" );			 // *cw*
-},
+    KennyDialoggins.Adapter.setPosition(this);
+};
 
 
 /**
@@ -281,26 +270,71 @@ KennyDialoggins.Dialog.prototype.setPosition = function() {
  * the dialog.
  */
 KennyDialoggins.Dialog.prototype.show = function() {
+    KennyDialoggins.Adapter.show(this);
+};
 
-    this.setPosition();
+
+
+// ----------------------------------------------------------------------------
+// JQuery Adapter 
+// ----------------------------------------------------------------------------
+
+KennyDialoggins.JQueryAdapter = function() {};
+
+
+KennyDialoggins.JQueryAdapter.prototype.hide = function(dialog) {
+    dialog._beforeHide; 										   // *cw*
+	$(dialog._element).fadeOut(200)								   // *cw*
+	dialog._isShowing = false;	        					   // *cw*
+   	dialog._afterHide;  			    						   // *cw*
+	$(document).unbind('click');      					 	   // *cw* 
+
+    if (dialog._frame) {  									   // *cw*
+		$(dialog._frame).fadeOut(200)  ;                            // *cw*
+    } 
+};
+
+
+KennyDialoggins.JQueryAdapter.prototype.setPosition = function(dialog) {
+    $(dialog._element).css('top', Math.ceil((($(window).height()/2) + $(window).scrollTop()   - ($(dialog._element).outerHeight()/2)) * 2/3) + "px" ); // *cw*
+
+    $(dialog._element).css('left', Math.ceil(($(window).width()/2) + $(window).scrollLeft() - ($(dialog._element).outerWidth()/2))  + "px" );			 // *cw*
     
-    if (this._frame) {
-		this._frame.css('top', this._element.css('top'));               // *cw*
-		this._frame.css('left', this._element.css('left'));             // *cw*
-		this._frame.css('width', this._element.outerWidth() + "px");    // *cw*
-		this._frame.css('height', this._element.outerHeight() + "px");  // *cw*
+};
+
+
+KennyDialoggins.JQueryAdapter.prototype.show = function(dialog) {
+    dialog.setPosition();
+    
+    var frame = $(dialog._frame);
+    var element = $(dialog._element);
+    
+    if (dialog._frame) {
+		frame.css('top',    element.css('top'));               // *cw*
+		frame.css('left',   element.css('left'));             // *cw*
+		frame.css('width',  element.outerWidth() + "px");    // *cw*
+		frame.css('height', element.outerHeight() + "px");  // *cw*
         
-		this._frame.fadeIn(200);						                // *cw*
+		frame.fadeIn(200);						                // *cw*
     }
     
-	this._beforeShow; 										  // *cw*
-	var main_this = this;									  // *cw*
-	this._element.fadeIn(200,function() { 				  	  // *cw*
-		this._isShowing = true;                  			  // *cw*
-	    this._afterShow;   	                                  // *cw*
-		$(document).click(main_this._hideListener);	          // *cw*
-	});					           						      // *cw*
-  
-  
-	
-}
+	dialog._beforeShow; 										  // *cw*
+	element.fadeIn(200,function() { 				  	  // *cw*
+		dialog._isShowing = true;                  			  // *cw*
+	    dialog._afterShow;   	                                  // *cw*
+		$(document).click(dialog._hideListener);	          // *cw*
+	});
+};
+
+
+// ----------------------------------------------------------------------------
+// Prototype Adapter 
+// ----------------------------------------------------------------------------
+
+
+
+// ----------------------------------------------------------------------------
+// Set default adapter
+// ----------------------------------------------------------------------------
+
+KennyDialoggins.Adapter = new KennyDialoggins.JQueryAdapter();
