@@ -151,12 +151,15 @@ KennyDialoggins.Dialog.show = function(id) {
  * observer.
  */
 KennyDialoggins.Dialog.prototype._generateHideListener = function() {
+	var self = this;
     return function(evt) {
+		
 		var origin = $(evt.target).closest(".kenny_dialoggins_dialog");		// *cw*
-        if (this._element.attr('id') !== origin.attr('id')) {				// *cw*
-            this.hide();
+        if (self._element.attr('id') !== origin.attr('id')) {				// *cw*
+            self.hide();
         }
-    }.bind(this);
+		
+    }
 };
 
 
